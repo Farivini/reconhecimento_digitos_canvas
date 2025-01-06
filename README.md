@@ -31,3 +31,25 @@ Este projeto demonstra como **treinar** uma rede neural simples para **reconhece
 2. **Instale as dependências** (se possuir um arquivo `requirements.txt`):
    ```bash
    pip install -r requirements.txt
+   streamlit run app_mnist_canvas.py
+
+Interaja com a aplicação:
+
+Clique em Carregar MNIST.
+Visualize algumas imagens.
+Faça o Split e normalização.
+Treine o modelo (veja a barra de progresso!).
+Avalie no teste.
+Desenhe seu dígito na aba “Predição” e clique em “Predizer Dígito”.
+Estrutura do Projeto
+app_mnist_canvas.py
+Arquivo principal que contém:
+Carregamento do MNIST
+Funções para dividir e normalizar os dados
+Construção e treino do modelo
+Barra de progresso durante o treino
+Avaliação no conjunto de teste
+Área de desenho (canvas) para predizer
+Autor
+Criado por Vinicius Farineli Freire
+LinkedIn
