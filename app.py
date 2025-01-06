@@ -285,11 +285,9 @@ O app converte seu desenho para 28x28, inverte as cores (para combinar com o MNI
 Se quiser apagar e tentar outro desenho, clique em "Resetar Canvas".
 """)
 
-if st.button("Resetar Canvas"):
-    st.session_state["canvas_digit"] = None
-    st.session_state["canvas_reset"] = True  # Flag para resetar o canvas
-else:
-    st.session_state["canvas_reset"] = False
+#if st.button("Resetar Canvas"):
+#   st.session_state["canvas_digit"] = None
+#    st.experimental_rerun()
 
 canvas_result = st_canvas(
     fill_color="rgba(255, 255, 255, 1)",
@@ -300,7 +298,7 @@ canvas_result = st_canvas(
     height=280,
     drawing_mode="freedraw",
     key="canvas_digit",
-    update_streamlit=st.session_state["canvas_reset"]  # Atualiza com base na flag
+    update_streamlit=True
 )
 
 if st.button("Predizer Dígito"):
