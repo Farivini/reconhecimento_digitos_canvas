@@ -312,14 +312,14 @@ if st.button("Predizer Dígito"):
             img = canvas_result.image_data.astype('uint8')  # Obtém a imagem desenhada no canvas
             img = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)  # Converte para escala de cinza
 
-            # 2. Ajustar contraste e cores
-            _, img = cv2.threshold(img, 50, 255, cv2.THRESH_BINARY_INV)  # Traço branco, fundo preto
+            # 2. Inverter as cores: fundo preto (0), traço branco (255)
+            img = 255 - img  # Inverte as cores do canvas
 
             # 3. Redimensionar para 28x28 pixels
             img = cv2.resize(img, (28, 28), interpolation=cv2.INTER_AREA)
 
             # 4. Normalizar para o intervalo [0, 1]
-            img = img / 255.0
+            img = img / 255.0  # MNIST exige valores normalizados
 
             # 5. Visualizar o dígito após o pré-processamento
             st.write("**Imagem após o pré-processamento (28x28 pixels):**")
