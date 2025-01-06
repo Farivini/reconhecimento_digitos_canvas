@@ -310,45 +310,47 @@ if st.button("Predizer Dígito"):
         if not st.session_state.get("modelo"):
             st.error("Não há modelo treinado/carregado para fazer a predição.")
         else:
-            # Salvar a imagem diretamente do canvas sem alterações
+            # 1. Salvar a imagem diretamente do canvas sem alterações
             img_path = "canvas_digit.png"
-            img = Image.fromarray(canvas_result.image_data.astype(np.uint8), 'RGBA')  # Conversão para PIL
+            img = Image.fromarray(canvas_result.image_data.astype(np.uint8), 'RGBA')  # Converter para imagem PIL
             img = img.convert("L")  # Converte para escala de cinza
-            img.save(img_path)  # Salva como arquivo PNG
+            img.save(img_path)  # Salvar como arquivo PNG
 
-            # Carregar a imagem salva para o pré-processamento
+            # 2. Carregar a imagem salva para o pré-processamento
             img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
-            # Verificar e ajustar a inversão de cores se necessário
-            if np.mean(img) > 127:  # Verifica se o fundo está claro (média de pixel alta)
-                img = 255 - img  # Inverte apenas se o fundo for claro
+            # 3. Ajustar contraste com threshold
+            _, img = cv2.threshold(img, 50, 255, cv2.THRESH_BINARY)
 
-            # Redimensiona para 28x28 pixels
+            # 4. Verificar se o fundo é claro e inverter as cores (fundo preto, traços brancos)
+            if np.mean(img) > 127:  # Se a média de pixel for alta, o fundo é claro
+                img = 255 - img  # Inverter fundo e traço
+
+            # 5. Redimensionar para 28x28 pixels
             img = cv2.resize(img, (28, 28))
 
-            # Normaliza os valores para [0, 1]
+            # 6. Normalizar os valores para [0, 1]
             img = img / 255.0
 
-            # Visualiza a imagem após o pré-processamento
+            # 7. Visualizar a imagem após o pré-processamento
             fig, ax = plt.subplots()
             ax.imshow(img, cmap='gray')
             st.pyplot(fig)
 
-            # Formata a imagem para o modelo
+            # 8. Formatar a imagem para o modelo
             img = img.reshape(1, 28, 28)
 
-            # Faz a predição
+            # 9. Fazer a predição com o modelo
             preds = st.session_state["modelo"].predict(img)
             pred_digit = np.argmax(preds[0])
 
-            # Exibir o resultado
+            # 10. Exibir os resultados
             st.write(f"**Dígito previsto**: {pred_digit}")
             st.write("**Probabilidades para cada dígito:**")
             st.bar_chart(preds[0])
-            if np.mean(img) > 127:  # Se a média for alta, o fundo é claro
-               img = 255 - img  # Inverte as cores (fundo preto, traço branco)
     else:
         st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
+
 
 
 
