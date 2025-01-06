@@ -287,7 +287,7 @@ Se quiser apagar e tentar outro desenho, clique em "Resetar Canvas".
 
 if st.button("Resetar Canvas"):
    st.session_state["canvas_digit"] = None
-    st.experimental_rerun()
+   st.experimental_rerun()
 
 canvas_result = st_canvas(
     fill_color="rgba(255, 255, 255, 1)",
