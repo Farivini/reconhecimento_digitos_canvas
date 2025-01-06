@@ -303,7 +303,6 @@ canvas_result = st_canvas(
     key="canvas_digit"
 )
 
-# Botão para Predição
 if st.button("Predizer Dígito"):
     if canvas_result and canvas_result.image_data is not None:
         if not st.session_state.get("modelo"):
@@ -314,16 +313,26 @@ if st.button("Predizer Dígito"):
             img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # Converte para escala de cinza
             img = 255 - img  # Inverte as cores (fundo preto, traços brancos)
             img = img / 255.0  # Normaliza para o intervalo [0, 1]
+            img = img.reshape(28, 28)  # Mantém a dimensão para visualização (28x28)
+
+            # 2. Exibição do dígito após o pré-processamento
+            st.write("**Imagem após o pré-processamento:**")
+            fig, ax = plt.subplots()
+            ax.imshow(img, cmap='gray')
+            ax.axis('off')  # Remove os eixos para uma visualização mais limpa
+            st.pyplot(fig)
+
+            # 3. Formatar a imagem para o modelo
             img = img.reshape(1, 28, 28)  # Ajusta para o formato esperado pelo modelo
 
-            # 2. Fazer a predição com o modelo
+            # 4. Fazer a predição com o modelo
             preds = st.session_state["modelo"].predict(img)
             pred_digit = np.argmax(preds[0])  # Obtém o dígito com maior probabilidade
 
-            # 3. Exibir resultados
+            # 5. Exibir os resultados
             st.write(f"**Dígito previsto**: {pred_digit}")
 
-            # 4. Gráfico das probabilidades
+            # 6. Gráfico das probabilidades
             import plotly.graph_objects as go
             fig = go.Figure(
                 data=[
