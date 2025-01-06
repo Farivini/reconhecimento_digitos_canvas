@@ -309,17 +309,17 @@ if st.button("Predizer Dígito"):
             st.error("Não há modelo treinado/carregado para fazer a predição.")
         else:
             # 1. Pré-processamento da imagem
-            img = cv2.resize(canvas_result.image_data.astype('uint8'), (28, 28))  # Redimensiona para 28x28
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # Converte para escala de cinza
-            img = 255 - img  # Inverte as cores (fundo preto, traços brancos)
+            img = canvas_result.image_data.astype('uint8')  # Obtém a imagem desenhada no canvas
+            img = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)  # Converte para escala de cinza
+            img = cv2.resize(img, (28, 28))  # Redimensiona para 28x28 pixels
+            img = cv2.threshold(img, 50, 255, cv2.THRESH_BINARY_INV)[1]  # Traço branco, fundo preto
             img = img / 255.0  # Normaliza para o intervalo [0, 1]
-            img = img.reshape(28, 28)  # Mantém a dimensão para visualização (28x28)
 
-            # 2. Exibição do dígito após o pré-processamento
-            st.write("**Imagem após o pré-processamento:**")
-            fig, ax = plt.subplots()
+            # 2. Visualização do dígito após o pré-processamento
+            st.write("**Imagem após o pré-processamento (28x28 pixels):**")
+            fig, ax = plt.subplots(figsize=(2, 2))  # Ajusta o tamanho para facilitar a visualização
             ax.imshow(img, cmap='gray')
-            ax.axis('off')  # Remove os eixos para uma visualização mais limpa
+            ax.axis('off')  # Remove os eixos
             st.pyplot(fig)
 
             # 3. Formatar a imagem para o modelo
