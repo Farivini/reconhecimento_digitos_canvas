@@ -292,16 +292,17 @@ else:
     st.session_state["canvas_reset"] = False
 
 canvas_result = st_canvas(
-    fill_color="rgba(255, 255, 255, 1)",
-    stroke_color="black",
-    stroke_width=10,
-    background_color="white",
-    width=280,
-    height=280,
-    drawing_mode="freedraw",
+    fill_color="#000000",               # Fundo preto
+    stroke_color="#FFFFFF",             # Traço branco
+    stroke_width=10,                    # Espessura do traço
+    background_color="#000000",         # Fundo preto
+    width=280,                          # Largura do canvas
+    height=280,                         # Altura do canvas
+    drawing_mode="freedraw",            # Desenho livre
     key="canvas_digit",
-    update_streamlit=st.session_state["canvas_reset"]  # Atualiza com base na flag
+    update_streamlit=st.session_state["canvas_reset"]
 )
+
 
 
 if st.button("Predizer Dígito"):
@@ -309,16 +310,19 @@ if st.button("Predizer Dígito"):
         if not st.session_state.get("modelo"):
             st.error("Não há modelo treinado/carregado para fazer a predição.")
         else:
-            # Converte o canvas para imagem (utilizando OpenCV para processar)
             img = canvas_result.image_data.astype(np.uint8)  # Dados da imagem como uint8
-            img = cv2.resize(img, (28, 28))  # Redimensiona para 28x28
+            img = cv2.resize(img, (28, 28))  # Redimensiona para 28x28 pixels
             img = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)  # Converte para escala de cinza
 
-            # Ajusta o contraste com threshold (dígito claro, fundo escuro)
-            _, img = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY_INV)
-
-            # Normaliza para [0, 1]
+            # Ajusta o contraste com threshold para destacar os traços
+            _, img = cv2.threshold(img, 50, 255, cv2.THRESH_BINARY)
+            
+            # Inverte as cores para MNIST (fundo preto, traço branco)
+            img = 255 - img
+            
+            # Normaliza os valores (0-1)
             img = img / 255.0
+
 
             # Visualiza o pré-processamento (opcional para depuração)
             fig, ax = plt.subplots()
