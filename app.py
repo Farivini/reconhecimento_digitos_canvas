@@ -310,26 +310,28 @@ if st.button("Predizer Dígito"):
         if not st.session_state.get("modelo"):
             st.error("Não há modelo treinado/carregado para fazer a predição.")
         else:
-            img = canvas_result.image_data.astype(np.uint8)  # Dados da imagem como uint8
-            img = cv2.resize(img, (28, 28))  # Redimensiona para 28x28 pixels
-            img = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)  # Converte para escala de cinza
+            # Converte a imagem do canvas para escala de cinza
+            img = canvas_result.image_data.astype(np.uint8)
+            img = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)
 
-            # Ajusta o contraste com threshold para destacar os traços
-            _, img = cv2.threshold(img, 50, 255, cv2.THRESH_BINARY)
-            
+            # Ajusta o contraste com threshold
+            _, img = cv2.threshold(img, 10, 255, cv2.THRESH_BINARY)
+
             # Inverte as cores para MNIST (fundo preto, traço branco)
             img = 255 - img
-            
-            # Normaliza os valores (0-1)
+
+            # Redimensiona para 28x28 pixels
+            img = cv2.resize(img, (28, 28))
+
+            # Normaliza os valores para [0, 1]
             img = img / 255.0
 
-
-            # Visualiza o pré-processamento (opcional para depuração)
+            # Visualiza o resultado do pré-processamento
             fig, ax = plt.subplots()
             ax.imshow(img, cmap='gray')
             st.pyplot(fig)
 
-            # Ajusta o formato para o modelo
+            # Formata a imagem para o modelo
             img = img.reshape(1, 28, 28)
 
             # Faz a predição
