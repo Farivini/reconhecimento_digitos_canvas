@@ -308,31 +308,37 @@ if st.button("Predizer Dígito"):
         if not st.session_state.get("modelo"):
             st.error("Não há modelo treinado/carregado para fazer a predição.")
         else:
-            # 1. Pré-processamento da imagem
+            # 1. Capturar a imagem do canvas
             img = canvas_result.image_data.astype('uint8')  # Obtém a imagem desenhada no canvas
             img = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)  # Converte para escala de cinza
-            img = cv2.resize(img, (28, 28))  # Redimensiona para 28x28 pixels
-            img = cv2.threshold(img, 50, 255, cv2.THRESH_BINARY_INV)[1]  # Traço branco, fundo preto
-            img = img / 255.0  # Normaliza para o intervalo [0, 1]
 
-            # 2. Visualização do dígito após o pré-processamento
+            # 2. Ajustar contraste e cores
+            _, img = cv2.threshold(img, 50, 255, cv2.THRESH_BINARY_INV)  # Traço branco, fundo preto
+
+            # 3. Redimensionar para 28x28 pixels
+            img = cv2.resize(img, (28, 28), interpolation=cv2.INTER_AREA)
+
+            # 4. Normalizar para o intervalo [0, 1]
+            img = img / 255.0
+
+            # 5. Visualizar o dígito após o pré-processamento
             st.write("**Imagem após o pré-processamento (28x28 pixels):**")
             fig, ax = plt.subplots(figsize=(2, 2))  # Ajusta o tamanho para facilitar a visualização
             ax.imshow(img, cmap='gray')
             ax.axis('off')  # Remove os eixos
             st.pyplot(fig)
 
-            # 3. Formatar a imagem para o modelo
+            # 6. Formatar a imagem para o modelo
             img = img.reshape(1, 28, 28)  # Ajusta para o formato esperado pelo modelo
 
-            # 4. Fazer a predição com o modelo
+            # 7. Fazer a predição com o modelo
             preds = st.session_state["modelo"].predict(img)
             pred_digit = np.argmax(preds[0])  # Obtém o dígito com maior probabilidade
 
-            # 5. Exibir os resultados
+            # 8. Exibir os resultados
             st.write(f"**Dígito previsto**: {pred_digit}")
 
-            # 6. Gráfico das probabilidades
+            # 9. Gráfico das probabilidades
             import plotly.graph_objects as go
             fig = go.Figure(
                 data=[
@@ -352,6 +358,7 @@ if st.button("Predizer Dígito"):
             st.plotly_chart(fig)
     else:
         st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
+
 
 
 
