@@ -311,32 +311,32 @@ if st.button("Predizer Dígito"):
         else:
             # Converte do canvas para PIL Image
             img = Image.fromarray(canvas_result.image_data.astype(np.uint8), 'RGBA')
-            img = img.convert('L')  # escala de cinza
-            img = img.filter(ImageFilter.SHARPEN)
-            img = img.resize((28, 28))
+            img = img.convert('L')  # Converte para escala de cinza
+            img = img.resize((28, 28))  # Redimensiona para 28x28
 
-            # Converte para array e normaliza
-            arr = np.array(img).astype('float32') / 255.0
+            # Converte para array NumPy
+            arr = np.array(img).astype('float32')
 
-            # Inverter para ficar similar ao MNIST (dígito claro em fundo escuro)
-            arr = 1.0 - arr
+            # Inverte os valores (dígito claro em fundo escuro)
+            arr = 255.0 - arr
 
-            # Visualize a entrada
+            # Normaliza os valores (0-1)
+            arr = arr / 255.0
+
+            # Visualize a imagem processada
             fig, ax = plt.subplots()
             ax.imshow(arr, cmap='gray')
             st.pyplot(fig)
 
             # Reshape para o formato esperado pelo modelo
             arr = arr.reshape(1, 28, 28)
-            st.write(f"Formato da entrada para o modelo: {arr.shape}")
 
             # Faz a predição
             preds = st.session_state["modelo"].predict(arr)
-            st.write(f"Probabilidades para cada dígito: {preds[0]}")
-
             pred_digit = np.argmax(preds[0])
 
             st.write(f"**Dígito previsto**: {pred_digit}")
+            st.write("**Probabilidades para cada dígito:**")
             st.bar_chart(preds[0])
     else:
         st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
