@@ -345,11 +345,12 @@ if st.button("Predizer Dígito"):
             st.write(f"**Dígito previsto**: {pred_digit}")
             st.write("**Probabilidades para cada dígito:**")
             st.bar_chart(preds[0])
+            if np.mean(img) > 127:  # Se a média for alta, o fundo é claro
+               img = 255 - img  # Inverte as cores (fundo preto, traço branco)
     else:
         st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
 
-if np.mean(img) > 127:  # Se a média for alta, o fundo é claro
-   img = 255 - img  # Inverte as cores (fundo preto, traço branco)
+
 
 
 
