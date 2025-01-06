@@ -310,9 +310,13 @@ if st.button("Predizer Dígito"):
         if not st.session_state.get("modelo"):
             st.error("Não há modelo treinado/carregado para fazer a predição.")
         else:
-            # Converte a imagem do canvas para escala de cinza
-            img = canvas_result.image_data.astype(np.uint8)
-            img = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)
+            # Salvar a imagem do canvas na pasta atual
+            img_path = "canvas_digit.png"
+            img = Image.fromarray(canvas_result.image_data.astype(np.uint8), 'RGBA')
+            img.save(img_path)  # Salva a imagem na pasta atual
+
+            # Carregar a imagem salva para pré-processamento
+            img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
             # Ajusta o contraste com threshold
             _, img = cv2.threshold(img, 10, 255, cv2.THRESH_BINARY)
@@ -326,11 +330,6 @@ if st.button("Predizer Dígito"):
             # Normaliza os valores para [0, 1]
             img = img / 255.0
 
-            # Visualiza o resultado do pré-processamento
-            fig, ax = plt.subplots()
-            ax.imshow(img, cmap='gray')
-            st.pyplot(fig)
-
             # Formata a imagem para o modelo
             img = img.reshape(1, 28, 28)
 
@@ -338,11 +337,13 @@ if st.button("Predizer Dígito"):
             preds = st.session_state["modelo"].predict(img)
             pred_digit = np.argmax(preds[0])
 
+            # Exibir o resultado
             st.write(f"**Dígito previsto**: {pred_digit}")
             st.write("**Probabilidades para cada dígito:**")
             st.bar_chart(preds[0])
     else:
         st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
+
 
 
 
