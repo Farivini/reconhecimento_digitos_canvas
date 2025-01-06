@@ -319,12 +319,9 @@ if st.button("Predizer Dígito"):
             # Carregar a imagem salva para o pré-processamento
             img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
-            # Verificar se o fundo e os traços estão corretos
-            # Inverte as cores (fundo preto, traço branco)
-            img = 255 - img
-
-            # Ajusta o contraste com threshold
-            _, img = cv2.threshold(img, 10, 255, cv2.THRESH_BINARY)
+            # Verificar e ajustar a inversão de cores se necessário
+            if np.mean(img) > 127:  # Verifica se o fundo está claro (média de pixel alta)
+                img = 255 - img  # Inverte apenas se o fundo for claro
 
             # Redimensiona para 28x28 pixels
             img = cv2.resize(img, (28, 28))
@@ -332,7 +329,7 @@ if st.button("Predizer Dígito"):
             # Normaliza os valores para [0, 1]
             img = img / 255.0
 
-            # Visualiza a imagem salva e ajustada
+            # Visualiza a imagem após o pré-processamento
             fig, ax = plt.subplots()
             ax.imshow(img, cmap='gray')
             st.pyplot(fig)
@@ -350,6 +347,9 @@ if st.button("Predizer Dígito"):
             st.bar_chart(preds[0])
     else:
         st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
+
+if np.mean(img) > 127:  # Se a média for alta, o fundo é claro
+   img = 255 - img  # Inverte as cores (fundo preto, traço branco)
 
 
 
