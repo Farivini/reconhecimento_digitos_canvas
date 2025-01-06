@@ -9,4 +9,6 @@ keras==3.2.0
 opencv-python==4.8.0.74
 setuptools>=65.5.0
 wheel>=0.40.0
+plotly==5.15.0
+
 
