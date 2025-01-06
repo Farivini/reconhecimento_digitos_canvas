@@ -356,9 +356,6 @@ if st.button("Predizer Dígito"):
 
 
 
-
-
-
 st.markdown("---")
 
 st.markdown("""
