@@ -291,66 +291,58 @@ if st.button("Resetar Canvas"):
 else:
     st.session_state["canvas_reset"] = False
 
+# Configuração do Canvas
 canvas_result = st_canvas(
     fill_color="#000000",               # Fundo preto
     stroke_color="#FFFFFF",             # Traço branco
-    stroke_width=10,                    # Espessura do traço
+    stroke_width=20,                    # Espessura do traço
     background_color="#000000",         # Fundo preto
-    width=280,                          # Largura do canvas
-    height=280,                         # Altura do canvas
+    width=256,                          # Largura do canvas
+    height=256,                         # Altura do canvas
     drawing_mode="freedraw",            # Desenho livre
-    key="canvas_digit",
-    update_streamlit=st.session_state["canvas_reset"]
+    key="canvas_digit"
 )
 
-
-
+# Botão para Predição
 if st.button("Predizer Dígito"):
     if canvas_result and canvas_result.image_data is not None:
         if not st.session_state.get("modelo"):
             st.error("Não há modelo treinado/carregado para fazer a predição.")
         else:
-            # 1. Salvar a imagem diretamente do canvas sem alterações
-            img_path = "canvas_digit.png"
-            img = Image.fromarray(canvas_result.image_data.astype(np.uint8), 'RGBA')  # Converter para imagem PIL
-            img = img.convert("L")  # Converte para escala de cinza
-            img.save(img_path)  # Salvar como arquivo PNG
+            # 1. Pré-processamento da imagem
+            img = cv2.resize(canvas_result.image_data.astype('uint8'), (28, 28))  # Redimensiona para 28x28
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # Converte para escala de cinza
+            img = 255 - img  # Inverte as cores (fundo preto, traços brancos)
+            img = img / 255.0  # Normaliza para o intervalo [0, 1]
+            img = img.reshape(1, 28, 28)  # Ajusta para o formato esperado pelo modelo
 
-            # 2. Carregar a imagem salva para o pré-processamento
-            img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-
-            # 3. Ajustar contraste com threshold
-            _, img = cv2.threshold(img, 50, 255, cv2.THRESH_BINARY)
-
-            # 4. Verificar se o fundo é claro e inverter as cores (fundo preto, traços brancos)
-            if np.mean(img) > 127:  # Se a média de pixel for alta, o fundo é claro
-                img = 255 - img  # Inverter fundo e traço
-
-            # 5. Redimensionar para 28x28 pixels
-            img = cv2.resize(img, (28, 28))
-
-            # 6. Normalizar os valores para [0, 1]
-            img = img / 255.0
-
-            # 7. Visualizar a imagem após o pré-processamento
-            fig, ax = plt.subplots()
-            ax.imshow(img, cmap='gray')
-            st.pyplot(fig)
-
-            # 8. Formatar a imagem para o modelo
-            img = img.reshape(1, 28, 28)
-
-            # 9. Fazer a predição com o modelo
+            # 2. Fazer a predição com o modelo
             preds = st.session_state["modelo"].predict(img)
-            pred_digit = np.argmax(preds[0])
+            pred_digit = np.argmax(preds[0])  # Obtém o dígito com maior probabilidade
 
-            # 10. Exibir os resultados
+            # 3. Exibir resultados
             st.write(f"**Dígito previsto**: {pred_digit}")
-            st.write("**Probabilidades para cada dígito:**")
-            st.bar_chart(preds[0])
+
+            # 4. Gráfico das probabilidades
+            import plotly.graph_objects as go
+            fig = go.Figure(
+                data=[
+                    go.Bar(
+                        x=np.arange(0, 10),  # Dígitos 0-9
+                        y=preds[0] * 100  # Probabilidades em porcentagem
+                    )
+                ]
+            )
+            fig.update_layout(
+                title="Probabilidades para cada dígito",
+                xaxis_title="Dígitos",
+                yaxis_title="Probabilidade (%)",
+                width=500,
+                height=500
+            )
+            st.plotly_chart(fig)
     else:
         st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
-
 
 
 
