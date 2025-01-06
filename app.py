@@ -314,25 +314,23 @@ if st.button("Predizer Dígito"):
             img = img.convert('L')  # Converte para escala de cinza
             img = img.resize((28, 28))  # Redimensiona para 28x28
 
-            # Converte para array NumPy
-            arr = np.array(img).astype('float32')
-
-            # Inverte os valores (dígito claro em fundo escuro)
-            arr = 255.0 - arr
+            # Corrige os valores para branco no dígito e preto no fundo
+            img = np.array(img)
+            img = 255 - img  # Inverte as cores
 
             # Normaliza os valores (0-1)
-            arr = arr / 255.0
+            img = img / 255.0
 
-            # Visualize a imagem processada
+            # Visualiza o resultado do pré-processamento
             fig, ax = plt.subplots()
-            ax.imshow(arr, cmap='gray')
+            ax.imshow(img, cmap='gray')
             st.pyplot(fig)
 
-            # Reshape para o formato esperado pelo modelo
-            arr = arr.reshape(1, 28, 28)
+            # Ajusta o formato da entrada para o modelo
+            img = img.reshape(1, 28, 28)
 
             # Faz a predição
-            preds = st.session_state["modelo"].predict(arr)
+            preds = st.session_state["modelo"].predict(img)
             pred_digit = np.argmax(preds[0])
 
             st.write(f"**Dígito previsto**: {pred_digit}")
@@ -340,6 +338,7 @@ if st.button("Predizer Dígito"):
             st.bar_chart(preds[0])
     else:
         st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
+
 
 st.markdown("---")
 
