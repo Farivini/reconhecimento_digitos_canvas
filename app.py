@@ -313,9 +313,7 @@ if st.button("Predizer Dígito"):
             img = canvas_result.image_data.astype('uint8')  # Obtém a imagem desenhada no canvas
             img = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)  # Converte para escala de cinza
 
-            # 2. Inverter as cores (caso necessário)
-            # Assegura que o fundo seja preto (0) e o traço seja branco (255)
-            img = 255 - img  
+            # 2. NÃO inverter as cores (mantém o fundo preto e traço branco)
 
             # 3. Redimensionar para 28x28 pixels
             img = cv2.resize(img, (28, 28), interpolation=cv2.INTER_AREA)
@@ -360,7 +358,6 @@ if st.button("Predizer Dígito"):
             st.plotly_chart(fig)
     else:
         st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
-
 
 
 
