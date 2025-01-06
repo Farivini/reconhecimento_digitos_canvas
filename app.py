@@ -321,17 +321,22 @@ if st.button("Predizer Dígito"):
             # Inverter para ficar similar ao MNIST (dígito claro em fundo escuro)
             arr = 1.0 - arr
 
-            # (Opcional) se quiser visualizar a imagem final:
-            # fig, ax = plt.subplots()
-            # ax.imshow(arr, cmap='gray')
-            # st.pyplot(fig)
+            # Visualize a entrada
+            fig, ax = plt.subplots()
+            ax.imshow(arr, cmap='gray')
+            st.pyplot(fig)
 
+            # Reshape para o formato esperado pelo modelo
             arr = arr.reshape(1, 28, 28)
+            st.write(f"Formato da entrada para o modelo: {arr.shape}")
+
+            # Faz a predição
             preds = st.session_state["modelo"].predict(arr)
+            st.write(f"Probabilidades para cada dígito: {preds[0]}")
+
             pred_digit = np.argmax(preds[0])
 
             st.write(f"**Dígito previsto**: {pred_digit}")
-            st.write("**Probabilidades (0-9)**:")
             st.bar_chart(preds[0])
     else:
         st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
