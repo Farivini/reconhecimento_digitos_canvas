@@ -309,24 +309,25 @@ if st.button("Predizer Dígito"):
         if not st.session_state.get("modelo"):
             st.error("Não há modelo treinado/carregado para fazer a predição.")
         else:
-            # Converte do canvas para PIL Image
+            # Converte o canvas para imagem PIL
             img = Image.fromarray(canvas_result.image_data.astype(np.uint8), 'RGBA')
             img = img.convert('L')  # Converte para escala de cinza
-            img = img.resize((28, 28))  # Redimensiona para 28x28
+            img = img.resize((28, 28))  # Redimensiona para 28x28 pixels
 
-            # Corrige os valores para branco no dígito e preto no fundo
+            # Ajusta o contraste para destacar os traços
             img = np.array(img)
-            img = 255 - img  # Inverte as cores
+            threshold = 50  # Valor de limite para destacar traços
+            img = np.where(img > threshold, 255, 0)  # Pixels claros viram branco, outros preto
 
-            # Normaliza os valores (0-1)
+            # Normaliza os valores (0 a 1)
             img = img / 255.0
 
-            # Visualiza o resultado do pré-processamento
+            # Visualiza a imagem resultante (opcional)
             fig, ax = plt.subplots()
             ax.imshow(img, cmap='gray')
             st.pyplot(fig)
 
-            # Ajusta o formato da entrada para o modelo
+            # Redimensiona a imagem para o formato esperado pelo modelo
             img = img.reshape(1, 28, 28)
 
             # Faz a predição
@@ -338,6 +339,7 @@ if st.button("Predizer Dígito"):
             st.bar_chart(preds[0])
     else:
         st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
+
 
 
 st.markdown("---")
