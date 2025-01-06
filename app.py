@@ -310,25 +310,32 @@ if st.button("Predizer Dígito"):
         if not st.session_state.get("modelo"):
             st.error("Não há modelo treinado/carregado para fazer a predição.")
         else:
-            # Salvar a imagem do canvas na pasta atual
+            # Salvar a imagem diretamente do canvas sem alterações
             img_path = "canvas_digit.png"
-            img = Image.fromarray(canvas_result.image_data.astype(np.uint8), 'RGBA')
-            img.save(img_path)  # Salva a imagem na pasta atual
+            img = Image.fromarray(canvas_result.image_data.astype(np.uint8), 'RGBA')  # Conversão para PIL
+            img = img.convert("L")  # Converte para escala de cinza
+            img.save(img_path)  # Salva como arquivo PNG
 
-            # Carregar a imagem salva para pré-processamento
+            # Carregar a imagem salva para o pré-processamento
             img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+
+            # Verificar se o fundo e os traços estão corretos
+            # Inverte as cores (fundo preto, traço branco)
+            img = 255 - img
 
             # Ajusta o contraste com threshold
             _, img = cv2.threshold(img, 10, 255, cv2.THRESH_BINARY)
-
-            # Inverte as cores para MNIST (fundo preto, traço branco)
-            img = 255 - img
 
             # Redimensiona para 28x28 pixels
             img = cv2.resize(img, (28, 28))
 
             # Normaliza os valores para [0, 1]
             img = img / 255.0
+
+            # Visualiza a imagem salva e ajustada
+            fig, ax = plt.subplots()
+            ax.imshow(img, cmap='gray')
+            st.pyplot(fig)
 
             # Formata a imagem para o modelo
             img = img.reshape(1, 28, 28)
@@ -343,6 +350,7 @@ if st.button("Predizer Dígito"):
             st.bar_chart(preds[0])
     else:
         st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
+
 
 
 
