@@ -290,7 +290,12 @@ Se quiser apagar e tentar outro desenho, clique em "Resetar Canvas".
 if st.button("Resetar Canvas"):
     st.session_state["canvas_image_data"] = None  # Redefine a imagem armazenada
 
-# Canvas interativo
+# Recupera o desenho salvo ou inicializa com None
+initial_drawing = None
+if "canvas_image_data" in st.session_state and st.session_state["canvas_image_data"] is not None:
+    initial_drawing = st.session_state["canvas_image_data"].copy()  # Cria uma cópia modificável
+
+# Canvas interativo (corrigido)
 canvas_result = st_canvas(
     fill_color="#000000",               # Fundo preto
     stroke_color="#FFFFFF",             # Traço branco
@@ -300,8 +305,9 @@ canvas_result = st_canvas(
     height=256,                         # Altura do canvas
     drawing_mode="freedraw",            # Desenho livre
     key="canvas_digit",
-    initial_drawing=st.session_state.get("canvas_image_data", None)  # Carrega o último desenho, se houver
+    initial_drawing=initial_drawing     # Passa a cópia modificável
 )
+
 
 # Salva o desenho atual no estado da sessão
 if canvas_result and canvas_result.image_data is not None:
