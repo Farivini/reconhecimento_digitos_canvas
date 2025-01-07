@@ -288,8 +288,7 @@ Se quiser apagar e tentar outro desenho, clique em "Resetar Canvas".
 """)
 
 if st.button("Resetar Canvas"):
-    st.session_state["canvas_image"] = None  # Limpa o estado da imagem
-    st.experimental_rerun()
+   st.session_state["canvas_image_data"] = None  # Redefine o estado do canvas
 
 # Canvas para desenhar
 canvas_result = st_canvas(
