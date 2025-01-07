@@ -284,61 +284,63 @@ st.write("""
 Desenhe um dígito (0 a 9) no quadrado abaixo e clique em "Predizer Dígito".  
 O app converte seu desenho para 28x28, inverte as cores (para combinar com o MNIST) e pergunta ao modelo: “O que é isso?”.
 
-Se quiser apagar e tentar outro desenho, clique em "Resetar Canvas".
+Se quiser apagar e tentar outro desenho, desmarque e marque novamente o checkbox abaixo.
 """)
 
-if st.button("Resetar Canvas"):
-   st.session_state["canvas_image_data"] = None  # Redefine o estado do canvas
+# Controle do canvas com checkbox
+exibir_canvas = st.checkbox("Exibir Canvas para Desenho", value=True)
 
-# Canvas para desenhar
-canvas_result = st_canvas(
-    fill_color="rgba(255, 255, 255, 1)",
-    stroke_color="black",
-    stroke_width=10,
-    background_color="white",
-    width=280,
-    height=280,
-    drawing_mode="freedraw",
-    key="canvas_digit",
-    update_streamlit=True
-)
+if exibir_canvas:
+    # Canvas para desenhar
+    canvas_result = st_canvas(
+        fill_color="rgba(255, 255, 255, 1)",
+        stroke_color="black",
+        stroke_width=10,
+        background_color="white",
+        width=280,
+        height=280,
+        drawing_mode="freedraw",
+        key="canvas_digit",
+        update_streamlit=True
+    )
 
-# Salvar a imagem desenhada no session_state
-if canvas_result and canvas_result.image_data is not None:
-    st.session_state["canvas_image"] = canvas_result.image_data
+    # Salvar a imagem desenhada no session_state
+    if canvas_result and canvas_result.image_data is not None:
+        st.session_state["canvas_image"] = canvas_result.image_data
 
-if st.button("Predizer Dígito"):
-    if "canvas_image" in st.session_state and st.session_state["canvas_image"] is not None:
-        if not st.session_state.get("modelo"):
-            st.error("Não há modelo treinado/carregado para fazer a predição.")
+    if st.button("Predizer Dígito"):
+        if "canvas_image" in st.session_state and st.session_state["canvas_image"] is not None:
+            if not st.session_state.get("modelo"):
+                st.error("Não há modelo treinado/carregado para fazer a predição.")
+            else:
+                # Carregar a imagem do session_state
+                img = Image.fromarray(st.session_state["canvas_image"].astype(np.uint8), 'RGBA')
+                img = img.convert('L')  # escala de cinza
+                img = img.filter(ImageFilter.SHARPEN)
+                img = img.resize((28, 28))
+
+                # Converte para array e normaliza
+                arr = np.array(img).astype('float32') / 255.0
+
+                # Inverter para ficar similar ao MNIST (dígito claro em fundo escuro)
+                arr = 1.0 - arr
+
+                # (Opcional) se quiser visualizar a imagem final:
+                # fig, ax = plt.subplots()
+                # ax.imshow(arr, cmap='gray')
+                # st.pyplot(fig)
+
+                arr = arr.reshape(1, 28, 28)
+                preds = st.session_state["modelo"].predict(arr)
+                pred_digit = np.argmax(preds[0])
+
+                st.write(f"**Dígito previsto**: {pred_digit}")
+                st.write("**Probabilidades (0-9)**:")
+                st.bar_chart(preds[0])
         else:
-            # Carregar a imagem do session_state
-            img = Image.fromarray(st.session_state["canvas_image"].astype(np.uint8), 'RGBA')
-            img = img.convert('L')  # escala de cinza
-            img = img.filter(ImageFilter.SHARPEN)
-            img = img.resize((28, 28))
-
-            # Converte para array e normaliza
-            arr = np.array(img).astype('float32') / 255.0
-
-            # Inverter para ficar similar ao MNIST (dígito claro em fundo escuro)
-            arr = 1.0 - arr
-
-            # (Opcional) se quiser visualizar a imagem final:
-            # fig, ax = plt.subplots()
-            # ax.imshow(arr, cmap='gray')
-            # st.pyplot(fig)
-
-            arr = arr.reshape(1, 28, 28)
-            preds = st.session_state["modelo"].predict(arr)
-            pred_digit = np.argmax(preds[0])
-
-            st.write(f"**Dígito previsto**: {pred_digit}")
-            st.write("**Probabilidades (0-9)**:")
-            st.bar_chart(preds[0])
-    else:
-        st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
-
+            st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
+else:
+    st.info("Marque o checkbox acima para exibir o canvas.")
 
 
 st.markdown("---")
