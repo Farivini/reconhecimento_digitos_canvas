@@ -278,6 +278,7 @@ with col_load:
 # Seção 5: Predição no Canvas
 # -------------------------------------------------------------------------------------------------
 # Seção 5: Predição no Canvas
+# Seção 5: Predição no Canvas
 st.subheader("5) Desenhe um Dígito no Canvas e Peça para o Modelo Adivinhar")
 st.write("""
 Desenhe um dígito (0 a 9) no quadrado abaixo e clique em "Predizer Dígito".  
@@ -287,79 +288,57 @@ Se quiser apagar e tentar outro desenho, clique em "Resetar Canvas".
 """)
 
 if st.button("Resetar Canvas"):
-    st.session_state["canvas_digit"] = None
-    st.session_state["canvas_reset"] = True  # Flag para resetar o canvas
-else:
-    st.session_state["canvas_reset"] = False
+    st.session_state["canvas_image"] = None  # Limpa o estado da imagem
+    st.experimental_rerun()
 
-# Configuração do Canvas
+# Canvas para desenhar
 canvas_result = st_canvas(
-    fill_color="#000000",               # Fundo preto
-    stroke_color="#FFFFFF",             # Traço branco
-    stroke_width=20,                    # Espessura do traço
-    background_color="#000000",         # Fundo preto
-    width=256,                          # Largura do canvas
-    height=256,                         # Altura do canvas
-    drawing_mode="freedraw",            # Desenho livre
-    key="canvas_digit"
+    fill_color="rgba(255, 255, 255, 1)",
+    stroke_color="black",
+    stroke_width=10,
+    background_color="white",
+    width=280,
+    height=280,
+    drawing_mode="freedraw",
+    key="canvas_digit",
+    update_streamlit=True
 )
 
+# Salvar a imagem desenhada no session_state
+if canvas_result and canvas_result.image_data is not None:
+    st.session_state["canvas_image"] = canvas_result.image_data
+
 if st.button("Predizer Dígito"):
-    if canvas_result and canvas_result.image_data is not None:
+    if "canvas_image" in st.session_state and st.session_state["canvas_image"] is not None:
         if not st.session_state.get("modelo"):
             st.error("Não há modelo treinado/carregado para fazer a predição.")
         else:
-            # 1. Capturar a imagem do canvas
-            img = canvas_result.image_data.astype('uint8')  # Obtém a imagem desenhada no canvas
-            img = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)  # Converte para escala de cinza
+            # Carregar a imagem do session_state
+            img = Image.fromarray(st.session_state["canvas_image"].astype(np.uint8), 'RGBA')
+            img = img.convert('L')  # escala de cinza
+            img = img.filter(ImageFilter.SHARPEN)
+            img = img.resize((28, 28))
 
-            # 2. NÃO inverter as cores (mantém o fundo preto e traço branco)
+            # Converte para array e normaliza
+            arr = np.array(img).astype('float32') / 255.0
 
-            # 3. Redimensionar para 28x28 pixels
-            img = cv2.resize(img, (28, 28), interpolation=cv2.INTER_AREA)
+            # Inverter para ficar similar ao MNIST (dígito claro em fundo escuro)
+            arr = 1.0 - arr
 
-            # 4. Normalizar para o intervalo [0, 1]
-            img = img / 255.0  # MNIST exige valores normalizados
+            # (Opcional) se quiser visualizar a imagem final:
+            # fig, ax = plt.subplots()
+            # ax.imshow(arr, cmap='gray')
+            # st.pyplot(fig)
 
-            # 5. Visualizar o dígito após o pré-processamento
-            st.write("**Imagem após o pré-processamento (28x28 pixels):**")
-            fig, ax = plt.subplots(figsize=(2, 2))  # Ajusta o tamanho para facilitar a visualização
-            ax.imshow(img, cmap='gray')
-            ax.axis('off')  # Remove os eixos
-            st.pyplot(fig)
+            arr = arr.reshape(1, 28, 28)
+            preds = st.session_state["modelo"].predict(arr)
+            pred_digit = np.argmax(preds[0])
 
-            # 6. Formatar a imagem para o modelo
-            img = img.reshape(1, 28, 28)  # Ajusta para o formato esperado pelo modelo
-
-            # 7. Fazer a predição com o modelo
-            preds = st.session_state["modelo"].predict(img)
-            pred_digit = np.argmax(preds[0])  # Obtém o dígito com maior probabilidade
-
-            # 8. Exibir os resultados
             st.write(f"**Dígito previsto**: {pred_digit}")
-
-            # 9. Gráfico das probabilidades
-            import plotly.graph_objects as go
-            fig = go.Figure(
-                data=[
-                    go.Bar(
-                        x=np.arange(0, 10),  # Dígitos 0-9
-                        y=preds[0] * 100  # Probabilidades em porcentagem
-                    )
-                ]
-            )
-            fig.update_layout(
-                title="Probabilidades para cada dígito",
-                xaxis_title="Dígitos",
-                yaxis_title="Probabilidade (%)",
-                width=500,
-                height=500
-            )
-            st.plotly_chart(fig)
+            st.write("**Probabilidades (0-9)**:")
+            st.bar_chart(preds[0])
     else:
         st.warning("Desenhe algo no canvas antes de clicar em 'Predizer Dígito'.")
-
-
 
 
 
