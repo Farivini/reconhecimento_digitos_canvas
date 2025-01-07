@@ -288,7 +288,7 @@ Se quiser apagar e tentar outro desenho, desmarque e marque novamente o checkbox
 """)
 
 # Controle do canvas com checkbox
-exibir_canvas = st.checkbox("Exibir Canvas para Desenho", value=True)
+exibir_canvas = st.checkbox("Exibir Canvas para Desenho", value=False)
 
 if exibir_canvas:
     # Canvas para desenhar
