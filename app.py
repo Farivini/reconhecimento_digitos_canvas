@@ -286,6 +286,10 @@ O app converte seu desenho para 28x28, inverte as cores (para combinar com o MNI
 Se quiser apagar e tentar outro desenho, clique em "Resetar Canvas".
 """)
 
+# Resetar o canvas (com controle de estado)
+if "canvas_data" not in st.session_state:
+    st.session_state["canvas_data"] = None
+
 if st.button("Resetar Canvas"):
     st.session_state["canvas_digit"] = None
     st.session_state["canvas_reset"] = True  # Flag para resetar o canvas
