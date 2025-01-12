@@ -1,5 +1,9 @@
 # Reconhecimento de Dígitos MNIST em um Canvas
 
+
+https://reconhecimentodigitoscanvas-hx9nd3kduzjf2rdeonwccw.streamlit.app/
+
+
 Este projeto demonstra como treinar uma **Rede Neural** simples para reconhecer dígitos (0 a 9) usando o famoso dataset **MNIST** e uma aplicação **Streamlit** que permite desenhar os dígitos diretamente em um **canvas**.
 
 ## Visão Geral
